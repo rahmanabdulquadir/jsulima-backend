@@ -1,11 +1,7 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsString, IsNumber } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { IsString, IsNumber, IsOptional } from 'class-validator';
 
 export class CreateCheckoutDto {
-  // @ApiProperty({example: 'eiqufhoqiehfwrdgfw'})
-  // @IsString()
-  // userId: string;
-
   @ApiProperty({example: 'waefwergewthtrg'})
   @IsString()
   planId: string;
@@ -13,4 +9,9 @@ export class CreateCheckoutDto {
   @ApiProperty({example: '100'})
   @IsNumber()
   amount: number;
+
+  @ApiPropertyOptional({ example: 'DISCOUNT10' })
+  @IsOptional()
+  @IsString()
+  promoCode?: string;
 }

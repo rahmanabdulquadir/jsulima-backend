@@ -1,4 +1,4 @@
-import { Controller, Post, Body, UseGuards, Req, UnauthorizedException } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Req, UnauthorizedException, Get, Param } from '@nestjs/common';
 import { StripeService } from '../stripe/stripe.service';
 import { CreateCheckoutDto } from './create-checkout.dto';
 
@@ -32,5 +32,10 @@ export class BillingController {
     });
 
     return { url };
+  }
+
+  @Get('details/:sessionId')
+  async getPaymentDetails(@Param('sessionId') sessionId: string) {
+    return this.stripeService.getCheckoutSessionDetails(sessionId);
   }
 }

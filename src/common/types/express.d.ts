@@ -1,12 +1,12 @@
 // src/@types/express.d.ts
-import { UserRole } from '@prisma/client'; // or define your own role enum if you have one
+import { UserRole } from '@prisma/client';
 
 declare global {
   namespace Express {
     interface User {
       id: string;
       sub: string;
-      role: UserRole | string; // adjust based on what your token includes
+      role: UserRole | string; 
     }
 
     interface Request {

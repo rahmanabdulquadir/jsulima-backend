@@ -78,14 +78,15 @@ export class PromoCodeService {
     const promo = await this.prisma.promoCode.findUnique({
       where: { code },
     });
-
+  
     if (!promo) throw new NotFoundException('Promo code not found');
-
+  
     const now = new Date();
     const expired = new Date(promo.expiresAt) < now;
-
+  
     return {
       valid: !expired,
+      discountAmount: !expired ? promo.discount : 0, // <- Add this
       promo,
       message: expired ? 'Promo code expired' : 'Promo code is valid',
     };

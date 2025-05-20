@@ -15,9 +15,12 @@ import { Module } from '@nestjs/common';
 import { PromoCodeService } from './promo-code.service';
 import { PromoCodeController } from './promo-code.controller';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { PrismaModule } from 'src/prisma/prisma.module';
 
 @Module({
+  imports: [PrismaModule],
   controllers: [PromoCodeController],
   providers: [PromoCodeService, PrismaService],
+  exports: [PromoCodeService]
 })
 export class PromoCodeModule {}
