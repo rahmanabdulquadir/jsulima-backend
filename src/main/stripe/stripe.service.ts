@@ -82,6 +82,7 @@ export class StripeService {
           price_data: {
             currency: 'usd',
             product_data: {
+              
               name: `Subscription for Plan ID: ${planId}`,
             },
             unit_amount: Math.round(finalAmount * 100), // amount in cents

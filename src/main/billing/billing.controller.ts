@@ -14,7 +14,7 @@ export class BillingController {
   @UseGuards(JwtAuthGuard)
   @Post('checkout')
   async createCheckout(@Req() req: Request, @Body() body: CreateCheckoutDto) {
-    const { planId, amount } = body;
+    const { planId, amount, promoCode } = body;
     const userId = req.user?.id; // extracted from auth token
 
     if (!userId) {
@@ -26,6 +26,7 @@ export class BillingController {
     const url = await this.stripeService.createCheckoutSession({
       userId,
       planId,
+      promoCode,
       amount,
       successUrl,
       cancelUrl,
