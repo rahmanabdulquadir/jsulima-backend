@@ -18,8 +18,8 @@ export class StripeController {
     @Res() response: Response,
     @Headers('stripe-signature') signature: string,
   ) {
-    console.log('⚡ Webhook route hit');
-    console.log('📝 Raw request body:', JSON.stringify(request.body, null, 2));
+    // console.log('⚡ Webhook route hit');
+    // console.log('📝 Raw request body:', JSON.stringify(request.body, null, 2));
 
     let event: Stripe.Event;
 
@@ -28,9 +28,9 @@ export class StripeController {
         request.body,
         signature,
       );
-      console.log('✅ Stripe Webhook Event constructed successfully!');
-      console.log('📦 Event Type:', event.type);
-      console.log('📦 Full Event:', JSON.stringify(event, null, 2));
+      // console.log('✅ Stripe Webhook Event constructed successfully!');
+      // console.log('📦 Event Type:', event.type);
+      // console.log('📦 Full Event:', JSON.stringify(event, null, 2));
     } catch (err) {
       console.error('❌ Webhook signature verification failed.', err.message);
       return response.status(400).send(`Webhook Error: ${err.message}`);
@@ -38,18 +38,18 @@ export class StripeController {
 
     // Handle checkout.session.completed
     if (event.type === 'checkout.session.completed') {
-      console.log('🎯 Handling checkout.session.completed event...');
+      // console.log('🎯 Handling checkout.session.completed event...');
       const session = event.data.object as Stripe.Checkout.Session;
-      console.log('📄 Session Payload:', JSON.stringify(session, null, 2));
+      // console.log('📄 Session Payload:', JSON.stringify(session, null, 2));
 
       const userId = session.metadata?.userId;
       const planId = session.metadata?.planId;
       const paymentIntentId = session.payment_intent as string;
 
-      console.log('🔍 Extracted Metadata:');
-      console.log('   userId:', userId, '| typeof:', typeof userId);
-      console.log('   planId:', planId);
-      console.log('   paymentIntentId:', paymentIntentId);
+      // console.log('🔍 Extracted Metadata:');
+      // console.log('   userId:', userId, '| typeof:', typeof userId);
+      // console.log('   planId:', planId);
+      // console.log('   paymentIntentId:', paymentIntentId);
 
       if (!userId || !planId || !paymentIntentId) {
         console.warn('⚠️ Missing metadata in session. Skipping.');
@@ -75,7 +75,7 @@ export class StripeController {
             const invoice = await this.stripeService.getInvoice(charge.invoice);
             invoiceUrl = invoice?.hosted_invoice_url || null;
           }
-          console.log('🧾 Invoice URL:', invoiceUrl);
+          // console.log('🧾 Invoice URL:', invoiceUrl);
         } catch (err) {
           console.error('❌ Failed to fetch invoice:', err.message);
         }

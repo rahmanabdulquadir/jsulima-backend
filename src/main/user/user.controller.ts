@@ -59,7 +59,7 @@ export class UserController {
     @UploadedFile() file: Express.Multer.File,
     @Req() req,
   ) {
-    console.log('Decoded JWT user:', req.user);
+    // console.log('Decoded JWT user:', req.user);
     const userId = req.user.id;
     const imageUrl = file.path;
     return this.userService.updateProfileImage(userId, imageUrl);

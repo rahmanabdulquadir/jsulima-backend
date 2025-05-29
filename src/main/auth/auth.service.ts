@@ -28,7 +28,7 @@ export class AuthService {
     // Log the JWT_SECRET value to ensure it's being read correctly
     const jwtSecret = this.configService.get<string>('JWT_ACCESS_SECRET');
     if (!jwtSecret) {
-      console.error('JWT_SECRET is not defined!');
+      // console.error('JWT_SECRET is not defined!');
       throw new Error('JWT_SECRET is not defined in the environment variables.');
     }
     // console.log('JWT_SECRET inside AuthService:', jwtSecret);
@@ -45,7 +45,7 @@ export class AuthService {
 
   async login(dto: LoginDto) {
     const user = await this.usersService.findByEmail(dto.email);
-    console.log("previous user", user)
+    // console.log("previous user", user)
     if (!user || !(await bcrypt.compare(dto.password, user.password))) {
       throw new UnauthorizedException('Invalid credentials');
     }
@@ -73,7 +73,7 @@ export class AuthService {
         isSubscribed: true,
       },
     });
-    console.log('✅ User fetched in login:', updatedUser);
+    // console.log('✅ User fetched in login:', updatedUser);
 
   
     return { access_token: accessToken, user: updatedUser };

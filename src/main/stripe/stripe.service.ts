@@ -37,14 +37,14 @@ export class StripeService {
     cancelUrl: string;
     promoCode?: string;
   }) {
-    console.log('Received payload:', {
-      userId,
-      planId,
-      amount,
-      successUrl,
-      cancelUrl,
-      promoCode,
-    });
+    // console.log('Received payload:', {
+    //   userId,
+    //   planId,
+    //   amount,
+    //   successUrl,
+    //   cancelUrl,
+    //   promoCode,
+    // });
     let finalAmount = amount;
     let finalPromoCode = 'N/A';
     let discountAmount = 0;
