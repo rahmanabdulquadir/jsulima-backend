@@ -164,6 +164,7 @@ export class AuthService {
   }
 
   async changePassword(userId: string, dto: ChangePasswordDto) {
+    // console.log('DTO:', dto);
     const user = await this.prisma.user.findUnique({ where: { id: userId } });
     if (!user) throw new NotFoundException('User not found');
   
@@ -179,6 +180,8 @@ export class AuthService {
       where: { id: userId },
       data: { password: hashedPassword },
     });
+  
+
     return { message: 'Password changed successfully' };
   }
 }

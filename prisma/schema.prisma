@@ -49,38 +49,38 @@ model Profile {
 }
 
 model Plan {
-  id            String             @id @default(uuid())
+  id            String              @id @default(uuid())
   title         String
   description   String
   price         Float
   features      String[]
   planType      PlanType
-  status        PlanStatus         @default(ACTIVE)
-  // isActive      Boolean            @default(true)
-  createdAt     DateTime           @default(now())
-  updatedAt     DateTime           @updatedAt
-  // endDate       DateTime? // <- add this
-  subscriptions UserSubscription[] // Who subscribed to this plan
+  status        PlanStatus          @default(ACTIVE)
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+  subscriptions UserSubscription[]
 }
 
 model UserSubscription {
-  id               String     @id @default(uuid())
-  user             User       @relation(fields: [userId], references: [id])
+  id               String       @id @default(uuid())
+  user             User         @relation(fields: [userId], references: [id])
   userId           String
-  plan             Plan       @relation(fields: [planId], references: [id])
+
+  plan             Plan         @relation(fields: [planId], references: [id], onDelete: Cascade)
   planId           String
-  startDate        DateTime   @default(now())
+
+  startDate        DateTime     @default(now())
   endDate          DateTime
-  isActive         Boolean    @default(true)
-  appliedPromoCode PromoCode? @relation(fields: [promoCodeId], references: [id])
+  isActive         Boolean      @default(true)
+
+  appliedPromoCode PromoCode?   @relation(fields: [promoCodeId], references: [id])
   promoCodeId      String?
 
-  // 🔽 Payment-related fields
-  paymentStatus   PaymentStatus @default(PENDING)
-  paymentIntentId String? // Stripe/Razorpay reference
-  paymentMethod   String? // e.g., "card", "upi", "paypal"
-  paidAt          DateTime?
-  invoiceUrl      String? // Optional: Stripe invoice/receipt URL
+  paymentStatus    PaymentStatus @default(PENDING)
+  paymentIntentId  String?
+  paymentMethod    String?
+  paidAt           DateTime?
+  invoiceUrl       String?
 }
 
 model PromoCode {
