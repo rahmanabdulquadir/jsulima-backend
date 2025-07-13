@@ -5,7 +5,6 @@ import { AuthModule } from './main/auth/auth.module';
 import { UserModule } from './main/user/user.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { ProfileModule } from './main/profile/profile.module';
 import { PrismaService } from './prisma/prisma.service';
 import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy } from './main/auth/strategies/jwt.strategy';
@@ -29,7 +28,6 @@ import { join } from 'path';
     PassportModule,
     AuthModule,
     UserModule,
-    ProfileModule,
     ConfigModule.forRoot({
       isGlobal: true,
     }),

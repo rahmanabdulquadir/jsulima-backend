@@ -1,7 +1,6 @@
 /* eslint-disable prettier/prettier */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-/* eslint-disable prettier/prettier */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import {
   Controller,
@@ -32,14 +31,13 @@ export class UserController {
     return this.userService.findAll();
   }
 
-  @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('access-token')
   @Patch('update-profile')
   async updateProfile(@Req() req, @Body() dto: UpdateUserDto) {
     const userId = req.user.id;
     return this.userService.updateProfile(userId, dto);
   }
-  @UseGuards(JwtAuthGuard)
+
   @ApiBearerAuth('access-token')
   @ApiConsumes('multipart/form-data')
   @Post('upload-profile-image')
@@ -59,9 +57,16 @@ export class UserController {
     @UploadedFile() file: Express.Multer.File,
     @Req() req,
   ) {
-    // console.log('Decoded JWT user:', req.user);
     const userId = req.user.id;
     const imageUrl = file.path;
     return this.userService.updateProfileImage(userId, imageUrl);
+  }
+
+  // ✅ NEW: GET /users/profile
+  @ApiBearerAuth('access-token')
+  @Get('profile')
+  async getMyProfile(@Req() req) {
+    const user = req.user;
+    return this.userService.getUserProfile(user);
   }
 }

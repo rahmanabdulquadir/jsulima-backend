@@ -21,11 +21,7 @@ async function main() {
         email: adminEmail,
         password: hashedPassword,
         role: 'ADMIN',
-        profile: {
-          create: {
-            name: 'Super Admin',
-          },
-        },
+      
       },
     });
 

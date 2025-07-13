@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { RegisterDto } from '../auth/register.dto';
@@ -18,17 +18,9 @@ export class UserService {
         password: hashedPassword,
         phoneNumber: dto.phoneNumber,
         role: 'USER',
-      },
-    });
-
-    await this.prisma.profile.create({
-      data: {
-        name: dto.fullName,
         userName: dto.userName,
-        phone: dto.phoneNumber,
-        image: dto.image,
         country: dto.country,
-        userId: user.id,
+        image: dto.image,
       },
     });
 
@@ -42,17 +34,13 @@ export class UserService {
         fullName: true,
         email: true,
         phoneNumber: true,
+        userName: true,
+        country: true,
+        image: true,
         role: true,
+        isSubscribed: true,
         createdAt: true,
         updatedAt: true,
-        // you can include profile if you want:
-        profile: {
-          select: {
-            userName: true,
-            image: true,
-            country: true,
-          },
-        },
       },
     });
   }
@@ -61,38 +49,62 @@ export class UserService {
     return this.prisma.user.findUnique({ where: { email } });
   }
 
-  async updateProfile(userId: string, dto: UpdateUserDto) {
-    // Split the DTO to separate user and profile fields
-    const { fullName, phoneNumber, country, userName, image } = dto;
+  async getUserProfile(user: any) {
+    const userId = user?.id;
+    if (!userId) {
+      throw new NotFoundException('Invalid or missing user ID');
+    }
 
-    // Update user model fields
+    const existing = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        fullName: true,
+        email: true,
+        phoneNumber: true,
+        userName: true,
+        country: true,
+        image: true,
+        role: true,
+        isSubscribed: true,
+        createdAt: true,
+      },
+    });
+
+    if (!existing) {
+      throw new NotFoundException('User not found');
+    }
+
+    return existing;
+  }
+
+  async updateProfile(userId: string, dto: UpdateUserDto) {
+    const {
+      fullName,
+      phoneNumber,
+      userName,
+      country,
+      image
+    } = dto;
+
     const updatedUser = await this.prisma.user.update({
       where: { id: userId },
       data: {
         ...(fullName && { fullName }),
         ...(phoneNumber && { phoneNumber }),
-      },
-    });
-
-    // Update profile model fields
-    const updatedProfile = await this.prisma.profile.update({
-      where: { userId }, // Because Profile.userId is unique
-      data: {
-        ...(country && { country }),
         ...(userName && { userName }),
+        ...(country && { country }),
         ...(image && { image }),
       },
     });
 
-    return { ...updatedUser, profile: updatedProfile };
+    return updatedUser;
   }
 
   async updateProfileImage(userId: string, imageUrl: string) {
-    return this.prisma.profile.update({
-      where: { userId },
+    return this.prisma.user.update({
+      where: { id: userId },
       data: { image: imageUrl },
     });
   }
-
-
 }

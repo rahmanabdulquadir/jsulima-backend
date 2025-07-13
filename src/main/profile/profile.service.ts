@@ -1,28 +1,38 @@
-// src/main/profile/profile.service.ts
+// // src/main/profile/profile.service.ts
 
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from 'src/prisma/prisma.service';
+// import { Injectable, NotFoundException } from '@nestjs/common';
+// import { PrismaService } from 'src/prisma/prisma.service';
 
 
-@Injectable()
-export class ProfileService {
-  constructor(private prisma: PrismaService) {}
+// @Injectable()
+// export class ProfileService {
+//   constructor(private prisma: PrismaService) {}
 
-  async getMyProfile(user: any) {
-    const userId = user?.id;
+//   async getMyProfile(user: any) {
+//     const userId = user?.id;
   
-    if (!userId) {
-      throw new NotFoundException('Invalid or missing user ID');
-    }
+//     if (!userId) {
+//       throw new NotFoundException('Invalid or missing user ID');
+//     }
   
-    const profile = await this.prisma.profile.findUnique({
-      where: { userId },
-    });
+//     const profile = await this.prisma.profile.findUnique({
+//       where: { userId },
+//       include: {
+//         user: {
+//           select: {
+//             id: true,
+//             email: true,
+//             role: true,
+//             // any other user fields you want
+//           },
+//         },
+//       },
+//     });
   
-    if (!profile) {
-      throw new NotFoundException('Profile not found');
-    }
+//     if (!profile) {
+//       throw new NotFoundException('Profile not found');
+//     }
   
-    return profile;
-  }
-}
+//     return profile;
+//   }
+// }

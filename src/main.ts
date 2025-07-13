@@ -22,11 +22,11 @@ async function seedAdmin() {
         email: adminEmail,
         password: hashed,
         role: 'ADMIN',
-        profile: {
-          create: {
-            name: 'Super Admin',
-          },
-        },
+        // profile: {
+        //   create: {
+        //     name: 'Super Admin',
+        //   },
+        // },
       },
     });
     console.log('✅ Admin seeded');
