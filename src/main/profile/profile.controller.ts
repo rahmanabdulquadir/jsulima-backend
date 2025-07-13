@@ -16,11 +16,11 @@ import { ApiBearerAuth } from '@nestjs/swagger';
 export class ProfileController {
   constructor(private readonly profileService: ProfileService) {}
 
+  @Get('me')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('access-token')
-  @Get('me')
   getMyProfile(@Req() req: any) {
-    // console.log('User ID:', req?.user);
+    console.log('🔐 JWT Payload:', req.user);
     return this.profileService.getMyProfile(req.user);
   }
 

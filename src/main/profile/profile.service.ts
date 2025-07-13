@@ -8,15 +8,15 @@ import { PrismaService } from 'src/prisma/prisma.service';
 export class ProfileService {
   constructor(private prisma: PrismaService) {}
 
-  async getMyProfile(userId: any) {
+  async getMyProfile(user: any) {
+    const userId = user?.id;
+  
     if (!userId) {
-      throw new NotFoundException('User ID is required');
+      throw new NotFoundException('Invalid or missing user ID');
     }
   
-    // console.log('Fetching profile for userId:', userId.sub);  // Debugging log
-  
     const profile = await this.prisma.profile.findUnique({
-      where: { userId: userId.sub },
+      where: { userId },
     });
   
     if (!profile) {
