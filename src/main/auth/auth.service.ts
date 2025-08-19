@@ -10,11 +10,10 @@ import { UserService } from '../user/user.service';
 import * as bcrypt from 'bcrypt';
 import { RegisterDto } from './register.dto';
 import { LoginDto } from './login.dto';
-import { PrismaService } from 'src/prisma/prisma.service';
 import { ConfigService } from '@nestjs/config';
-import * as crypto from 'crypto';
 import { MailerService } from '@nestjs-modules/mailer';
 import { ChangePasswordDto } from './forget-password.dto';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class AuthService {
@@ -35,13 +34,26 @@ export class AuthService {
   }
 
 
-  async register(dto: RegisterDto) {
-    const existing = await this.usersService.findByEmail(dto.email);
-    if (existing) throw new ForbiddenException('Email already exists');
-    const user = await this.usersService.createUser(dto);
-    const tokens = await this.generateTokens(user);
-    return { user, ...tokens };
-  }
+  // async register(dto: RegisterDto) {
+  //   const existing = await this.usersService.findByEmail(dto.email);
+  //   if (existing) throw new ForbiddenException('Email already exists');
+  //   const user = await this.usersService.createUser(dto);
+  //   const tokens = await this.generateTokens(user);
+  //   return { user, ...tokens };
+  // }
+
+
+  async registerWithOtp(dto: RegisterDto) {
+  await this.verifyOtp(dto.email,dto.otp, 'register');
+
+  const existing = await this.usersService.findByEmail(dto.email);
+  if (existing) throw new ForbiddenException('Email already exists');
+
+  const user = await this.usersService.createUser(dto);
+  const tokens = await this.generateTokens(user);
+  return { user, ...tokens };
+}
+
 
   async login(dto: LoginDto) {
     const user = await this.usersService.findByEmail(dto.email);
@@ -112,56 +124,32 @@ export class AuthService {
     }
   }
 
-  async forgotPassword(email: string) {
-    const user = await this.prisma.user.findUnique({ where: { email } });
 
-    if (!user) throw new BadRequestException('User not found');
 
-    const token = crypto.randomBytes(32).toString('hex');
-    const expires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
 
-    await this.prisma.passwordResetToken.create({
-      data: {
-        email,
-        token,
-        expiresAt: expires,
-      },
-    });
+async resetPassword(email: string, newPassword: string) {
+  const record = await this.prisma.otpVerification.findFirst({
+    where: { email, type: 'reset-password', isVerified: true },
+  });
 
-    const resetLink = `http://localhost:3000/reset-password?token=${token}`;
-
-    await this.mailerService.sendMail({
-      to: email,
-      subject: 'Password Reset',
-      html: `<p>Click the link to reset your password:</p><a href="${resetLink}">${resetLink}</a>`,
-    });
-
-    return { message: 'Password reset email sent' };
+  if (!record) {
+    throw new UnauthorizedException('You must verify OTP before resetting password');
   }
 
-  async resetPassword(token: string, newPassword: string) {
-    const resetRecord = await this.prisma.passwordResetToken.findUnique({
-      where: { token },
-    });
+  const hashed = await bcrypt.hash(newPassword, 12);
+  await this.prisma.user.update({
+    where: { email },
+    data: { password: hashed },
+  });
 
-    if (
-      !resetRecord ||
-      new Date() > new Date(resetRecord.expiresAt)
-    ) {
-      throw new BadRequestException('Token is invalid or expired');
-    }
+  // cleanup
+  await this.prisma.otpVerification.delete({ where: { id: record.id } });
 
-    const hashed = await bcrypt.hash(newPassword, 12);
+  return { message: 'Password has been reset successfully' };
+}
 
-    await this.prisma.user.update({
-      where: { email: resetRecord.email },
-      data: { password: hashed },
-    });
 
-    await this.prisma.passwordResetToken.delete({ where: { token } });
 
-    return { message: 'Password has been reset successfully' };
-  }
 
   async changePassword(userId: string, dto: ChangePasswordDto) {
     // console.log('DTO:', dto);
@@ -184,4 +172,65 @@ export class AuthService {
 
     return { message: 'Password changed successfully' };
   }
+
+
+
+
+async generateOtp(email: string, type: 'register' | 'reset-password') {
+  const otp = Math.floor(1000 + Math.random() * 9000).toString();
+  const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
+
+  await this.prisma.otpVerification.create({
+    data: { email, otp, type, expiresAt,isVerified:false}, // add field
+  });
+
+  await this.mailerService.sendMail({
+    to: email,
+    subject: `Your ${type === 'register' ? 'Registration' : 'Reset Password'} OTP`,
+    html: `<p>Your OTP is <b>${otp}</b>. It expires in 5 minutes.</p>`,
+  });
+
+  return { message: 'OTP sent to email' };
+}
+
+
+
+
+async verifyOtp(email: string, otp: string, type: 'register' | 'reset-password') {
+  const record = await this.prisma.otpVerification.findFirst({
+    where: { email, otp, type },
+  });
+
+  if (!record || new Date() > new Date(record.expiresAt)) {
+    throw new BadRequestException('OTP is invalid or expired');
+  }
+
+  // Delete OTP after verification
+  await this.prisma.otpVerification.delete({ where: { id: record.id } });
+
+  return true;
+}
+
+
+
+async verifyResetOtp(email: string, otp: string) {
+  const record = await this.prisma.otpVerification.findFirst({
+    where: { email, otp, type: 'reset-password' },
+  });
+
+  if (!record || new Date() > record.expiresAt) {
+    throw new BadRequestException('OTP is invalid or expired');
+  }
+
+  // mark as verified instead of deleting
+  await this.prisma.otpVerification.update({
+    where: { id: record.id },
+    data: { isVerified: true },
+  });
+
+  return { message: 'OTP verified, you can now reset your password' };
+}
+
+
+
 }
