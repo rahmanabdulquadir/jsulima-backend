@@ -32,6 +32,18 @@ model User {
   resetTokenExpiry DateTime? // expiry time for reset token
 }
 
+
+model OtpVerification{
+  id        String   @id @default(cuid())
+  email     String
+  isVerified Boolean @default(false)
+  type      String 
+  otp       String                            
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+
 model PasswordResetToken {
   id        String   @id @default(uuid())
   email     String
